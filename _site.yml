@@ -13,7 +13,7 @@ navbar:
     - text: Metropolis-HastingsMCMC
       href: mcmc-r_.html
     - text: PCA
-      href: rapport_acp.html
+      href: RapportAcp.html
     - text: comparing-bayesian-models
       href: comparing-bayesian-models.html
     - text: shinyApp
