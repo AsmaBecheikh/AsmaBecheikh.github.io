@@ -1,0 +1,375 @@
+---
+title: "Comparing Bayesian Models"
+author: "Asma Becheikh"
+date: ""
+output: 
+  html_document: 
+    toc: yes
+---
+
+# Surgical: Institutional ranking
+ 
+## Introduction 
+    
+
+I'm interesting in this Kernel in the comparison between two  models and checking which of them fits better  our   data. 
+
+I'm considering a  data set of  mortality rates in 12 hospitals performing cardiac surgery in babies. 
+
+```{r, prompt=T}
+"dt" <-
+list(n = c(47, 148, 119, 810,	211, 196, 148, 215, 207, 97, 256, 360),
+        r  = c(0, 18, 8, 46, 8, 13, 9,	31, 14, 8, 29, 24),
+        N = 12)
+head(dt)
+```
+
+
+
+  
+  # The Models 
+  
+  Since we have no prior information on the parameters we will use in the follwoing two bayesian models non-informative priors. 
+
+Here's below the BUGS code of the them:  
+
+
+
++  Model1 
+
+```{r, eval=F}
+model
+    {
+    for( i in 1 : N ) {
+		      p[i] ~ dbeta(1.0, 1.0)
+			r[i] ~ dbin(p[i], n[i])
+		   }
+    
+    }
+```
+
+
+
++  Model2 
+
+```{r, eval=F}
+model
+    {
+    for( i in 1 : N ) {
+				b[i] ~ dnorm(mu,tau)
+				r[i] ~ dbin(p[i],n[i])
+				logit(p[i]) <- b[i]
+				}
+			pop.mean <- exp(mu) / (1 + exp(mu))
+			mu ~ dnorm(0.0,1.0E-6)
+			sigma <- 1 / sqrt(tau)
+			tau ~ dgamma(0.001,0.001)	   
+    
+    }
+    
+    ```
+    
+
+## `R` implementation
+
+As mentioned above we will use for this analysis `R2OpenBUGS`, we need then to write these two models into two different `.txt` files. We need to write three `R` functions to initialize the Markov Chains. Here's then the `R` code that can be implemented. We will later run the `bugs` command and study the convergence of each generated Markov Chain.
+
+Let's first load the needed packages
+
+
+```{r, prompt=T}
+library(R2OpenBUGS)
+library(coda)
+```
+
++ The initializing functions
+
+```{r, prompt=T,eval=F}
+inits1 <- function(){
+  inits = list(p = c(0.1, 0.1, 0.1, 0.1,	0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1))
+}
+
+inits2 <- function(){
+  inits = list(b = c(	0.1,	0.1,	0.1,	0.1,	0.1,	0.1,	0.1,	0.1,	0.1,	0.1,	0.1,	0.1), 
+	     tau = 1, mu = 0)
+}
+
+
+
+```
++ The parameters 
+
+```{r, prompt=T,eval=F}
+params1<-"p"
+params2<-c("b","tau","mu")
+
+
+
+```
++ Creating the files of the BUGS code
+
+```{r, prompt=F,eval=F}
+###  Model1
+sink('Mod1_cp.txt')
+cat("
+    model
+    {
+    for( i in 1 : N ) {
+		      p[i] ~ dbeta(1.0, 1.0)
+			r[i] ~ dbin(p[i], n[i])
+		   }
+    
+    }
+    ",fill=T)
+sink()
+
+###  Model2
+sink('Mod2_cp.txt')
+cat("
+    model
+    {
+    for( i in 1 : N ) {
+				b[i] ~ dnorm(mu,tau)
+				r[i] ~ dbin(p[i],n[i])
+				logit(p[i]) <- b[i]
+				}
+			pop.mean <- exp(mu) / (1 + exp(mu))
+			mu ~ dnorm(0.0,1.0E-6)
+			sigma <- 1 / sqrt(tau)
+			tau ~ dgamma(0.001,0.001)	   
+    
+    }
+    ",fill=T)
+sink()
+
+filename1<-"Mod1_cp.txt"
+filename2<-"Mod2_cp.txt"
+
+
++ Running now the Markov Chains . We will run two MC with 1000 iterations with a burn-in equal to 900. 
+
+```{r, eval=F}
+
+out1<-bugs(dt,inits1,params1,filename1,codaPkg=F,
+           n.thin =1, n.iter=10000,debug=F,
+           n.chains = 3,working.directory=getwd(),
+           OpenBUGS.pgm=OpenBUGS.pgm2, useWINE=T)
+out2<-bugs(dt,inits2,params2,filename2,codaPkg=F,
+           n.thin =1, n.iter=10000,debug=F,
+           n.chains = 3,working.directory=getwd(),
+           OpenBUGS.pgm=OpenBUGS.pgm, useWINE=T)
+
+
+# Model Checking
+
+```{r, echo=F}
+load("C:/Users/asus/Documents/f10.RData")
+
+```
+
+
+## Model 1 (fixed effects)
+
+We will then check the convergence of the Markov Chain contained in the `R` object  `out0`. 
+
+We start then by the trace plot of the parameters
+
+```{r, echo=T,prompt=T,collapse=F}
+dim(out1$sims.array)
+p=mcmc(out1$sims.array[,,1])
+lambda=exp(p)
+matplot(lambda,col=c("red","green","blue"),ylab=expression(lambda),type="l")
+
+```
+We proceed also by estimating the $widehat{R}$ and its confidence interval:
+
+```
+{r, prompt=T,collapse=F}
+gelman.diag(list(p[,1],p[,2],p[,3]))
+gelman.plot(list(p[,1],p[,2],p[,3]))
+   
+
+```
+Let us proceed to the auto-correlation diagnostics
+
+```{r, prompt=T,collapse=F}
+autocorr(p)
+autocorr.diag(p,0:10)
+autocorr.plot(p)
+```
+We finally proceed to the Geweke diagnostics that show the stationary of the generated sample.
+
+```{r, prompt=T,collapse=F}
+geweke.diag(p)
+```
+
+We can then conclude that the Markov Chain in out1 converges to the posterior distribution.
+
+
+
+
+## Model 2 (random effects)
+
+We will then check the convergence of the Markov Chain contained in the `R` object `out2`. 
+
+We start then by the trace plot of the parameters
+
+```{r, prompt=T,collapse=T}
+dim(out2$sims.array)
+b=mcmc(out2$sims.array[,,1])
+lambda1=exp(b)
+matplot(lambda1,col=c("red","green","blue"),type="l")
+
+tau=mcmc(out2$sims.array[,,2])
+lambda2=exp(tau)
+matplot(lambda2,col=c("red","green","blue"),type="l")
+
+
+mu=mcmc(out2$sims.array[,,3])
+matplot(mu,col=c("red","green","blue"),type="l")
+```
+
+
+We can't then conclude from these trace plots any abnormality in the convergence of the Markov Chain and let us then proceed to the others diagnostic methods. 
+
++ Estimation of $\widehat{R}$
+
+
+```{r, prompt=T,collapse=T}
+gelman.diag(list(b[,1],b[,2],b[,3]))
+gelman.plot(list(b[,1],b[,2],b[,3])) 
+
+gelman.diag(list(tau[,1],tau[,2],tau[,3]))
+gelman.plot(list(tau[,1],tau[,2],tau[,3])) 
+
+gelman.diag(list(mu[,1],mu[,2],mu[,3]))
+gelman.plot(list(mu[,1],mu[,2],mu[,3])) 
+```
+
+We may need to run the MC with a number of iterations larger  than 10,000. We will try later 30,000 updates for the Markov Chain.
+
++ Auto-correlation procedure 
+
+
+```{r, prompt=T,collapse=T}
+autocorr.diag(b,0:10)
+autocorr.plot(b)
+
+autocorr.diag(tau,0:10)
+autocorr.plot(tau)
+
+autocorr.diag(mu,0:10)
+autocorr.plot(mu)
+```
+
+We need then to increase the thin parameter when running the next  MC. 
+
++ a new update of the MC:
+
+```{r,prompt=F,echo=T,eval=F}
+out2a<-bugs(dt,inits2,params2,filename2,n.burnin = 25000,
+           n.thin =5, n.iter=30000
+           n.chains = 3
+           )
+```
+
+
+ Let us then proceed with  another convergence diagnostics:
+
+
+```{r, prompt=T,collapse=T}
+
+b=mcmc(out2a$sims.array[,,1])
+tau=mcmc(out2a$sims.array[,,2])
+mu=mcmc(out2a$sims.array[,,3])
+
+gelman.diag(list(b[,1],b[,2],b[,3]))
+gelman.plot(list(b[,1],b[,2],b[,3])) 
+
+gelman.diag(list(tau[,1],tau[,2],tau[,3]))
+gelman.plot(list(tau[,1],tau[,2],tau[,3])) 
+
+gelman.diag(list(mu[,1],mu[,2],mu[,3]))
+gelman.plot(list(mu[,1],mu[,2],mu[,3])) 
+```
+
+```{r, prompt=T,collapse=T}
+autocorr.diag(b,0:10)
+autocorr.plot(b)
+
+autocorr.diag(tau,0:10)
+autocorr.plot(tau)
+
+autocorr.diag(mu,0:10)
+autocorr.plot(mu)
+```
+
+
+```{r, prompt=T,collapse=T}
+geweke.diag(b)
+geweke.diag(tau)
+geweke.diag(mu)
+```
+The later MC convergences. We can considered it as a good estimate of the posterior distribution.
+
+##Conclusion
+ 
+ Finally when comparing the DIC of the two  models are
+ 
+```{r, prompt=T,collapse=T}
+out1$DIC
+out2a$DIC
+```
+
+
+We can conclude that the model 1 ( fixed effects)  fits better the data. We conclude also that the mean of the number of deaths is following a Binomial  distribution . 
+ 
+```{r, prompt=T,collapse=T}
+out1
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

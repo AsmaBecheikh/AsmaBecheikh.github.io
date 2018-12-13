@@ -1,0 +1,38 @@
+name: Asma Becheikh
+output_dir: '.'
+navbar:
+  title: Asma Becheikh
+  type: inverse
+  left:
+  - text: Home
+    icon: fa-home
+    href: index.html
+  - text: My Projects
+    icon: fa-rss
+    menu:
+    - text: Metropolis-HastingsMCMC
+      href: mcmc-r_.html
+    - text: PCA
+      href: rapport_acp.html
+    - text: comparing-bayesian-models
+      href: comparing-bayesian-models.html
+    - text: shinyApp
+      href: shinyApp.html
+  - text: My CV
+    icon: fa-file-pdf-o 
+    href: Resume.pdf
+  right:
+  - icon: fa-github fa-lg
+    href: http://github.com/AsmaBecheikh
+  - icon: fa-linkedin fa-lg
+    href: https://www.linkedin.com/in/asma-becheikh-524809142/
+  - icon: fa-facebook fa-lg
+    href: https://www.facebook.com/asma.becheikh.3
+output:
+  html_document:
+    theme: flatly
+    highlight: textmate
+    css: styles.css
+    lib_dir: site_libs
+    self_contained: no
+

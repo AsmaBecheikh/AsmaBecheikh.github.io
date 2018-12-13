@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Asma Becheikh" />
+
+
+<title>Comparing Bayesian Models</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Asma Becheikh</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-rss"></span>
+     
+    My Projects
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="mcmc-r_.html">Metropolis-HastingsMCMC</a>
+    </li>
+    <li>
+      <a href="rapport_acp.html">PCA</a>
+    </li>
+    <li>
+      <a href="comparing-bayesian-models.html">comparing-bayesian-models</a>
+    </li>
+    <li>
+      <a href="shinyApp.html">shinyApp</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Resume.pdf">
+    <span class="fa fa-file-pdf-o"></span>
+     
+    My CV
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="http://github.com/AsmaBecheikh">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://www.linkedin.com/in/asma-becheikh-524809142/">
+    <span class="fa fa-linkedin fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://www.facebook.com/asma.becheikh.3">
+    <span class="fa fa-facebook fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Comparing Bayesian Models</h1>
+<h4 class="author"><em>Asma Becheikh</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#surgical-institutional-ranking">Surgical: Institutional ranking</a><ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#r-implementation"><code>R</code> implementation</a></li>
+<li><a href="#model-1-fixed-effects">Model 1 (fixed effects)</a></li>
+<li><a href="#model-2-random-effects">Model 2 (random effects)</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="surgical-institutional-ranking" class="section level1">
+<h1>Surgical: Institutional ranking</h1>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I’m interesting in this Kernel in the comparison between two models and checking which of them fits better our data.</p>
+<p>I’m considering a data set of mortality rates in 12 hospitals performing cardiac surgery in babies.</p>
+<pre class="r"><code>&gt; &quot;dt&quot; &lt;-
++ list(n = c(47, 148, 119, 810, 211, 196, 148, 215, 207, 97, 256, 360),
++         r  = c(0, 18, 8, 46, 8, 13, 9,    31, 14, 8, 29, 24),
++         N = 12)
+&gt; head(dt)</code></pre>
+<pre><code>## $n
+##  [1]  47 148 119 810 211 196 148 215 207  97 256 360
+## 
+## $r
+##  [1]  0 18  8 46  8 13  9 31 14  8 29 24
+## 
+## $N
+## [1] 12</code></pre>
+<p># The Models</p>
+<p>Since we have no prior information on the parameters we will use in the follwoing two bayesian models non-informative priors.</p>
+<p>Here’s below the BUGS code of the them:</p>
+<ul>
+<li>Model1</li>
+</ul>
+<pre class="r"><code>model
+    {
+    for( i in 1 : N ) {
+              p[i] ~ dbeta(1.0, 1.0)
+            r[i] ~ dbin(p[i], n[i])
+           }
+    
+    }</code></pre>
+<ul>
+<li>Model2</li>
+</ul>
+<pre class="r"><code>model
+    {
+    for( i in 1 : N ) {
+                b[i] ~ dnorm(mu,tau)
+                r[i] ~ dbin(p[i],n[i])
+                logit(p[i]) &lt;- b[i]
+                }
+            pop.mean &lt;- exp(mu) / (1 + exp(mu))
+            mu ~ dnorm(0.0,1.0E-6)
+            sigma &lt;- 1 / sqrt(tau)
+            tau ~ dgamma(0.001,0.001)      
+    
+    }</code></pre>
+</div>
+<div id="r-implementation" class="section level2">
+<h2><code>R</code> implementation</h2>
+<p>As mentioned above we will use for this analysis <code>R2OpenBUGS</code>, we need then to write these two models into two different <code>.txt</code> files. We need to write three <code>R</code> functions to initialize the Markov Chains. Here’s then the <code>R</code> code that can be implemented. We will later run the <code>bugs</code> command and study the convergence of each generated Markov Chain.</p>
+<p>Let’s first load the needed packages</p>
+<pre class="r"><code>&gt; library(R2OpenBUGS)
+&gt; library(coda)</code></pre>
+<ul>
+<li>The initializing functions</li>
+</ul>
+<pre class="r"><code>&gt; inits1 &lt;- function(){
++   inits = list(p = c(0.1, 0.1, 0.1, 0.1,  0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1))
++ }
+&gt; 
+&gt; inits2 &lt;- function(){
++   inits = list(b = c( 0.1,    0.1,    0.1,    0.1,    0.1,    0.1,    0.1,    0.1,    0.1,    0.1,    0.1,    0.1), 
++        tau = 1, mu = 0)
++ }</code></pre>
+<ul>
+<li>The parameters</li>
+</ul>
+<pre class="r"><code>&gt; params1&lt;-&quot;p&quot;
+&gt; params2&lt;-c(&quot;b&quot;,&quot;tau&quot;,&quot;mu&quot;)</code></pre>
+<ul>
+<li>Creating the files of the BUGS code</li>
+</ul>
+<pre class="r"><code>###  Model1
+sink(&#39;Mod1_cp.txt&#39;)
+cat(&quot;
+    model
+    {
+    for( i in 1 : N ) {
+              p[i] ~ dbeta(1.0, 1.0)
+            r[i] ~ dbin(p[i], n[i])
+           }
+    
+    }
+    &quot;,fill=T)
+sink()
+
+###  Model2
+sink(&#39;Mod2_cp.txt&#39;)
+cat(&quot;
+    model
+    {
+    for( i in 1 : N ) {
+                b[i] ~ dnorm(mu,tau)
+                r[i] ~ dbin(p[i],n[i])
+                logit(p[i]) &lt;- b[i]
+                }
+            pop.mean &lt;- exp(mu) / (1 + exp(mu))
+            mu ~ dnorm(0.0,1.0E-6)
+            sigma &lt;- 1 / sqrt(tau)
+            tau ~ dgamma(0.001,0.001)      
+    
+    }
+    &quot;,fill=T)
+sink()
+
+filename1&lt;-&quot;Mod1_cp.txt&quot;
+filename2&lt;-&quot;Mod2_cp.txt&quot;
+
+
++ Running now the Markov Chains . We will run two MC with 1000 iterations with a burn-in equal to 900. </code></pre>
+<pre class="r"><code>out1&lt;-bugs(dt,inits1,params1,filename1,codaPkg=F,
+           n.thin =1, n.iter=10000,debug=F,
+           n.chains = 3,working.directory=getwd(),
+           OpenBUGS.pgm=OpenBUGS.pgm2, useWINE=T)
+out2&lt;-bugs(dt,inits2,params2,filename2,codaPkg=F,
+           n.thin =1, n.iter=10000,debug=F,
+           n.chains = 3,working.directory=getwd(),
+           OpenBUGS.pgm=OpenBUGS.pgm, useWINE=T)
+
+
+# Model Checking</code></pre>
+</div>
+<div id="model-1-fixed-effects" class="section level2">
+<h2>Model 1 (fixed effects)</h2>
+<p>We will then check the convergence of the Markov Chain contained in the <code>R</code> object <code>out0</code>.</p>
+<p>We start then by the trace plot of the parameters</p>
+<pre class="r"><code>&gt; dim(out1$sims.array)</code></pre>
+<pre><code>## [1] 5000    3   13</code></pre>
+<pre class="r"><code>&gt; p=mcmc(out1$sims.array[,,1])
+&gt; lambda=exp(p)
+&gt; matplot(lambda,col=c(&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;),ylab=expression(lambda),type=&quot;l&quot;)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-10-1.png" width="672" /> We proceed also by estimating the <span class="math inline">\(widehat{R}\)</span> and its confidence interval:</p>
+<pre><code>{r, prompt=T,collapse=F}
+gelman.diag(list(p[,1],p[,2],p[,3]))
+gelman.plot(list(p[,1],p[,2],p[,3]))
+   
+</code></pre>
+<p>Let us proceed to the auto-correlation diagnostics</p>
+<pre class="r"><code>&gt; autocorr(p)</code></pre>
+<pre><code>## , , 1
+## 
+##                [,1]        [,2]          [,3]
+## Lag 0   1.000000000 0.009933780 -0.0052161142
+## Lag 1   0.019974788 0.022227859  0.0114345392
+## Lag 5  -0.015009283 0.005993912 -0.0065865642
+## Lag 10 -0.001914462 0.026841050 -0.0020523205
+## Lag 50 -0.004718451 0.013676621 -0.0006136924
+## 
+## , , 2
+## 
+##                [,1]          [,2]         [,3]
+## Lag 0   0.009933780  1.000000e+00  0.012288669
+## Lag 1  -0.007657110 -3.814890e-02 -0.011397636
+## Lag 5  -0.009527792  6.067940e-06  0.010524050
+## Lag 10  0.001209703 -1.926568e-02 -0.015344294
+## Lag 50  0.006071663 -2.409962e-02 -0.005941581
+## 
+## , , 3
+## 
+##                [,1]         [,2]         [,3]
+## Lag 0  -0.005216114  0.012288669  1.000000000
+## Lag 1  -0.014586409  0.012309264 -0.015391648
+## Lag 5   0.005683784  0.008265747  0.003452552
+## Lag 10  0.027403659  0.010138993  0.004182874
+## Lag 50 -0.017032480 -0.046513276 -0.008098008</code></pre>
+<pre class="r"><code>&gt; autocorr.diag(p,0:10)</code></pre>
+<pre><code>##                [,1]          [,2]         [,3]
+## Lag 0   1.000000000  1.000000e+00  1.000000000
+## Lag 1   0.019974788 -3.814890e-02 -0.015391648
+## Lag 2  -0.027151802 -5.590623e-03  0.001528107
+## Lag 3   0.021517387  8.033627e-04 -0.010929057
+## Lag 4   0.006218917 -2.206690e-04 -0.013557431
+## Lag 5  -0.015009283  6.067940e-06  0.003452552
+## Lag 6   0.006175764 -2.275218e-02  0.009363064
+## Lag 7  -0.004721896  1.766815e-02 -0.025277222
+## Lag 8   0.020168278  5.075395e-03 -0.003912033
+## Lag 9   0.002466768  4.817521e-03 -0.033821607
+## Lag 10 -0.001914462 -1.926568e-02  0.004182874</code></pre>
+<pre class="r"><code>&gt; autocorr.plot(p)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-11-1.png" width="672" /> We finally proceed to the Geweke diagnostics that show the stationary of the generated sample.</p>
+<pre class="r"><code>&gt; geweke.diag(p)</code></pre>
+<pre><code>## 
+## Fraction in 1st window = 0.1
+## Fraction in 2nd window = 0.5 
+## 
+##    var1    var2    var3 
+## -1.1256  0.2399 -0.8016</code></pre>
+<p>We can then conclude that the Markov Chain in out1 converges to the posterior distribution.</p>
+</div>
+<div id="model-2-random-effects" class="section level2">
+<h2>Model 2 (random effects)</h2>
+<p>We will then check the convergence of the Markov Chain contained in the <code>R</code> object <code>out2</code>.</p>
+<p>We start then by the trace plot of the parameters</p>
+<pre class="r"><code>&gt; dim(out2$sims.array)
+## [1] 5000    3   15
+&gt; b=mcmc(out2$sims.array[,,1])
+&gt; lambda1=exp(b)
+&gt; matplot(lambda1,col=c(&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;),type=&quot;l&quot;)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; tau=mcmc(out2$sims.array[,,2])
+&gt; lambda2=exp(tau)
+&gt; matplot(lambda2,col=c(&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;),type=&quot;l&quot;)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-13-2.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; 
+&gt; mu=mcmc(out2$sims.array[,,3])
+&gt; matplot(mu,col=c(&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;),type=&quot;l&quot;)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-13-3.png" width="672" /></p>
+<p>We can’t then conclude from these trace plots any abnormality in the convergence of the Markov Chain and let us then proceed to the others diagnostic methods.</p>
+<ul>
+<li>Estimation of <span class="math inline">\(\widehat{R}\)</span></li>
+</ul>
+<pre class="r"><code>&gt; gelman.diag(list(b[,1],b[,2],b[,3]))
+## Potential scale reduction factors:
+## 
+##      Point est. Upper C.I.
+## [1,]          1          1
+&gt; gelman.plot(list(b[,1],b[,2],b[,3])) </code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; gelman.diag(list(tau[,1],tau[,2],tau[,3]))
+## Potential scale reduction factors:
+## 
+##      Point est. Upper C.I.
+## [1,]          1          1
+&gt; gelman.plot(list(tau[,1],tau[,2],tau[,3])) </code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; gelman.diag(list(mu[,1],mu[,2],mu[,3]))
+## Potential scale reduction factors:
+## 
+##      Point est. Upper C.I.
+## [1,]          1          1
+&gt; gelman.plot(list(mu[,1],mu[,2],mu[,3])) </code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
+<p>We may need to run the MC with a number of iterations larger than 10,000. We will try later 30,000 updates for the Markov Chain.</p>
+<ul>
+<li>Auto-correlation procedure</li>
+</ul>
+<pre class="r"><code>&gt; autocorr.diag(b,0:10)
+##              [,1]         [,2]        [,3]
+## Lag 0  1.00000000  1.000000000  1.00000000
+## Lag 1  0.32006860  0.342401328  0.34155605
+## Lag 2  0.19659757  0.199509141  0.21675726
+## Lag 3  0.15142018  0.120611821  0.14069306
+## Lag 4  0.09857832  0.054693649  0.08077390
+## Lag 5  0.08684813  0.043534228  0.07445059
+## Lag 6  0.07462635  0.020927443  0.04515027
+## Lag 7  0.05665919 -0.009213829  0.03770174
+## Lag 8  0.02336367  0.005059712  0.02043030
+## Lag 9  0.02473561  0.021786884  0.01585114
+## Lag 10 0.01737539 -0.016195543 -0.01133003
+&gt; autocorr.plot(b)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; autocorr.diag(tau,0:10)
+##              [,1]       [,2]         [,3]
+## Lag 0  1.00000000 1.00000000  1.000000000
+## Lag 1  0.16903668 0.15883824  0.127499422
+## Lag 2  0.13624762 0.07377021  0.078122579
+## Lag 3  0.08281997 0.07108845  0.069858762
+## Lag 4  0.05654728 0.02770129  0.029767398
+## Lag 5  0.05402871 0.01840954  0.025943958
+## Lag 6  0.06812585 0.03348085  0.034336020
+## Lag 7  0.02131336 0.02205854  0.005143152
+## Lag 8  0.04328205 0.02214411  0.001163859
+## Lag 9  0.02061515 0.01794638 -0.003553110
+## Lag 10 0.03016306 0.01196034  0.017423105
+&gt; autocorr.plot(tau)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; autocorr.diag(mu,0:10)
+##                 [,1]        [,2]         [,3]
+## Lag 0   1.0000000000 1.000000000  1.000000000
+## Lag 1   0.0611895920 0.074559770  0.054541912
+## Lag 2   0.0530641713 0.040407749  0.018393081
+## Lag 3   0.0302437409 0.000273707  0.020983112
+## Lag 4   0.0167498877 0.034235379 -0.011232385
+## Lag 5   0.0213525556 0.007706754 -0.003329340
+## Lag 6   0.0259135266 0.000647724 -0.016633024
+## Lag 7   0.0141224937 0.008967425  0.011433899
+## Lag 8   0.0204484557 0.006276154 -0.008391834
+## Lag 9   0.0277777180 0.019722742  0.015728758
+## Lag 10 -0.0005654496 0.009829845  0.001522239
+&gt; autocorr.plot(mu)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-15-3.png" width="672" /></p>
+<p>We need then to increase the thin parameter when running the next MC.</p>
+<ul>
+<li>a new update of the MC:</li>
+</ul>
+<pre class="r"><code>out2a&lt;-bugs(dt,inits2,params2,filename2,n.burnin = 25000,
+           n.thin =5, n.iter=30000
+           n.chains = 3
+           )</code></pre>
+<p>Let us then proceed with another convergence diagnostics:</p>
+<pre class="r"><code>&gt; 
+&gt; b=mcmc(out2a$sims.array[,,1])
+&gt; tau=mcmc(out2a$sims.array[,,2])
+&gt; mu=mcmc(out2a$sims.array[,,3])
+&gt; 
+&gt; gelman.diag(list(b[,1],b[,2],b[,3]))
+## Potential scale reduction factors:
+## 
+##      Point est. Upper C.I.
+## [1,]          1          1
+&gt; gelman.plot(list(b[,1],b[,2],b[,3])) </code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; gelman.diag(list(tau[,1],tau[,2],tau[,3]))
+## Potential scale reduction factors:
+## 
+##      Point est. Upper C.I.
+## [1,]          1          1
+&gt; gelman.plot(list(tau[,1],tau[,2],tau[,3])) </code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-17-2.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; gelman.diag(list(mu[,1],mu[,2],mu[,3]))
+## Potential scale reduction factors:
+## 
+##      Point est. Upper C.I.
+## [1,]          1          1
+&gt; gelman.plot(list(mu[,1],mu[,2],mu[,3])) </code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-17-3.png" width="672" /></p>
+<pre class="r"><code>&gt; autocorr.diag(b,0:10)
+##                 [,1]         [,2]          [,3]
+## Lag 0   1.0000000000  1.000000000  1.0000000000
+## Lag 1   0.0722527747  0.068435252  0.0827475413
+## Lag 2   0.0334138600  0.010478131  0.0242597366
+## Lag 3  -0.0093404147  0.012652717 -0.0009752773
+## Lag 4   0.0081781642  0.014377170  0.0035632927
+## Lag 5  -0.0002235511  0.006424360 -0.0051494777
+## Lag 6  -0.0085411773 -0.008835640 -0.0052646922
+## Lag 7   0.0047412683  0.005904674  0.0077166661
+## Lag 8   0.0133354498  0.001274206  0.0042635489
+## Lag 9  -0.0019019347 -0.005775977 -0.0010691770
+## Lag 10  0.0095034664 -0.001018360  0.0033272729
+&gt; autocorr.plot(b)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; autocorr.diag(tau,0:10)
+##                [,1]          [,2]          [,3]
+## Lag 0   1.000000000  1.0000000000  1.0000000000
+## Lag 1   0.019725994  0.0226172979  0.0378472380
+## Lag 2   0.012788653  0.0196024797  0.0168333753
+## Lag 3   0.021158061 -0.0001321189  0.0045626724
+## Lag 4  -0.001848407  0.0016633303 -0.0132006877
+## Lag 5   0.009428221  0.0051904226  0.0082249292
+## Lag 6  -0.005056903 -0.0052096975  0.0133305501
+## Lag 7  -0.009174175  0.0017151955  0.0018857403
+## Lag 8   0.003468461  0.0096049165  0.0015569461
+## Lag 9   0.008782423 -0.0027752369 -0.0001689296
+## Lag 10 -0.004248295 -0.0128004107 -0.0079631990
+&gt; autocorr.plot(tau)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
+<pre class="r"><code>&gt; 
+&gt; autocorr.diag(mu,0:10)
+##                 [,1]         [,2]         [,3]
+## Lag 0   1.0000000000  1.000000000  1.000000000
+## Lag 1   0.0027251911  0.008444651  0.002938956
+## Lag 2   0.0062695059 -0.009262845  0.002085919
+## Lag 3   0.0073982762  0.004028267 -0.004932280
+## Lag 4   0.0146675295 -0.008212265  0.005632789
+## Lag 5  -0.0036057179  0.007808938  0.008737079
+## Lag 6  -0.0054467202 -0.004168338 -0.005881366
+## Lag 7   0.0027729729  0.006552230  0.018023652
+## Lag 8   0.0083955960 -0.007118024 -0.013672605
+## Lag 9  -0.0126618680 -0.002136951 -0.004971203
+## Lag 10  0.0004117873 -0.008889323  0.003446672
+&gt; autocorr.plot(mu)</code></pre>
+<p><img src="comparing-bayesian-models_files/figure-html/unnamed-chunk-18-3.png" width="672" /></p>
+<pre class="r"><code>&gt; geweke.diag(b)
+## 
+## Fraction in 1st window = 0.1
+## Fraction in 2nd window = 0.5 
+## 
+##    var1    var2    var3 
+##  0.7724  1.6963 -1.0588
+&gt; geweke.diag(tau)
+## 
+## Fraction in 1st window = 0.1
+## Fraction in 2nd window = 0.5 
+## 
+##    var1    var2    var3 
+##  0.4059 -2.1615 -0.1293
+&gt; geweke.diag(mu)
+## 
+## Fraction in 1st window = 0.1
+## Fraction in 2nd window = 0.5 
+## 
+##    var1    var2    var3 
+## -1.9220  0.7901 -0.8712</code></pre>
+<p>The later MC convergences. We can considered it as a good estimate of the posterior distribution.</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Finally when comparing the DIC of the two models are</p>
+<pre class="r"><code>&gt; out1$DIC
+## [1] 73.24
+&gt; out2a$DIC
+## [1] 74.47</code></pre>
+<p>We can conclude that the model 1 ( fixed effects) fits better the data. We conclude also that the mean of the number of deaths is following a Binomial distribution .</p>
+<pre class="r"><code>&gt; out1
+## Inference for Bugs model at &quot;Mod1_cp.txt&quot;, 
+## Current: 3 chains, each with 10000 iterations (first 5000 discarded)
+## Cumulative: n.sims = 15000 iterations saved
+##          mean  sd 2.5%  25%  50%  75% 97.5% Rhat n.eff
+## p[1]      0.0 0.0  0.0  0.0  0.0  0.0   0.1    1 15000
+## p[2]      0.1 0.0  0.1  0.1  0.1  0.1   0.2    1 15000
+## p[3]      0.1 0.0  0.0  0.1  0.1  0.1   0.1    1 15000
+## p[4]      0.1 0.0  0.0  0.1  0.1  0.1   0.1    1 15000
+## p[5]      0.0 0.0  0.0  0.0  0.0  0.1   0.1    1 15000
+## p[6]      0.1 0.0  0.0  0.1  0.1  0.1   0.1    1 15000
+## p[7]      0.1 0.0  0.0  0.1  0.1  0.1   0.1    1 15000
+## p[8]      0.1 0.0  0.1  0.1  0.1  0.2   0.2    1 15000
+## p[9]      0.1 0.0  0.0  0.1  0.1  0.1   0.1    1 15000
+## p[10]     0.1 0.0  0.0  0.1  0.1  0.1   0.2    1 15000
+## p[11]     0.1 0.0  0.1  0.1  0.1  0.1   0.2    1 15000
+## p[12]     0.1 0.0  0.0  0.1  0.1  0.1   0.1    1 15000
+## deviance 62.8 5.1 54.7 59.1 62.2 65.7  74.8    1 15000
+## 
+## For each parameter, n.eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor (at convergence, Rhat=1).
+## 
+## DIC info (using the rule, pD = Dbar-Dhat)
+## pD = 10.5 and DIC = 73.2
+## DIC is an estimate of expected predictive error (lower deviance is better).</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

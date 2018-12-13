@@ -1,0 +1,14 @@
+---
+title: "ShinyApp"
+author: "Asma Becheikh"
+date: ""
+output: 
+  html_document: 
+    toc: yes
+---
+##Application
+<iframe src="https://asmab.shinyapps.io/BecheikhAsma/"  height="400" width="100%" frameBorder="0"></iframe>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
