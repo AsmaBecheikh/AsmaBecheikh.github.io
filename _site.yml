@@ -18,6 +18,8 @@ navbar:
       href: comparing-bayesian-models.html
     - text: shinyApp
       href: shinyApp.html
+     - text: Visualisation with R
+      href: visualisation.html
   - text: My CV
     icon: fa-file-pdf-o 
     href: Resume.pdf
